@@ -1,0 +1,5605 @@
+{
+  "swaggerDoc": {
+    "openapi": "3.0.0",
+    "info": {
+      "title": "Hotel SaaS API",
+      "version": "1.0.0",
+      "description": "Tài liệu API cho hệ thống quản lý chuỗi khách sạn B2B"
+    },
+    "servers": [
+      {
+        "url": "http://localhost:8080",
+        "description": "Development Server"
+      }
+    ],
+    "components": {
+      "securitySchemes": {
+        "bearerAuth": {
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT"
+        }
+      },
+      "schemas": {
+        "ApiEnvelope": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "integer",
+              "example": 200
+            },
+            "status": {
+              "type": "boolean"
+            },
+            "message": {
+              "type": "string"
+            },
+            "data": {
+              "nullable": true
+            }
+          }
+        },
+        "CheckAccountBody": {
+          "type": "object",
+          "required": ["login_type", "keyLogin"],
+          "properties": {
+            "login_type": {
+              "type": "string",
+              "enum": ["customer", "user"],
+              "default": "customer"
+            },
+            "keyLogin": {
+              "type": "string",
+              "description": "Số điện thoại hoặc email (customer) / username (user)"
+            }
+          }
+        },
+        "LoginBody": {
+          "type": "object",
+          "required": ["login_type", "keyLogin", "password"],
+          "properties": {
+            "login_type": {
+              "type": "string",
+              "enum": ["customer", "user"],
+              "default": "customer"
+            },
+            "keyLogin": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string"
+            }
+          }
+        },
+        "AdminCreateBody": {
+          "type": "object",
+          "required": ["username", "fullName", "password"],
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "fullName": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string",
+              "description": "Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt"
+            }
+          }
+        },
+        "OwnerCreateBody": {
+          "type": "object",
+          "required": ["username", "fullName", "password"],
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "fullName": {
+              "type": "string"
+            },
+            "password": {
+              "type": "string",
+              "description": "Mật khẩu phải có chữ hoa, chữ thường, số và ký tự đặc biệt"
+            }
+          }
+        },
+        "ResendOtpBody": {
+          "type": "object",
+          "required": ["email"],
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        },
+        "ForgotPasswordBody": {
+          "type": "object",
+          "required": ["email"],
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        },
+        "ResetPasswordBody": {
+          "type": "object",
+          "required": ["token", "newPassword", "confirmPassword"],
+          "properties": {
+            "token": {
+              "type": "string"
+            },
+            "newPassword": {
+              "type": "string"
+            },
+            "confirmPassword": {
+              "type": "string"
+            }
+          }
+        },
+        "TokenPair": {
+          "type": "object",
+          "properties": {
+            "accessToken": {
+              "type": "string"
+            },
+            "refreshToken": {
+              "type": "string"
+            }
+          }
+        },
+        "RenewTokenBody": {
+          "type": "object",
+          "required": ["refreshToken"],
+          "properties": {
+            "refreshToken": {
+              "type": "string"
+            }
+          }
+        },
+        "ChangePasswordBody": {
+          "type": "object",
+          "required": ["oldPassword", "newPassword", "confirmPassword"],
+          "properties": {
+            "oldPassword": {
+              "type": "string"
+            },
+            "newPassword": {
+              "type": "string",
+              "description": "Mật khẩu mới phải khác mật khẩu cũ, có ít nhất 6 ký tự và chứa chữ hoa, chữ thường, số, ký tự đặc biệt"
+            },
+            "confirmPassword": {
+              "type": "string"
+            }
+          }
+        },
+        "GoogleLoginBody": {
+          "type": "object",
+          "required": ["idToken"],
+          "properties": {
+            "idToken": {
+              "type": "string"
+            }
+          }
+        },
+        "GoogleLoginResponse": {
+          "type": "object",
+          "properties": {
+            "accessToken": {
+              "type": "string"
+            },
+            "refreshToken": {
+              "type": "string"
+            },
+            "isNewUser": {
+              "type": "boolean",
+              "description": "Biến hiển thị nếu người dùng mới cần cập nhật thêm thông tin"
+            }
+          }
+        },
+        "RegisterSendOtpBody": {
+          "type": "object",
+          "required": ["name", "phone", "email", "password"],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "password": {
+              "type": "string"
+            }
+          }
+        },
+        "RegisterVerifyOtpBody": {
+          "type": "object",
+          "required": ["email", "otp"],
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "otp": {
+              "type": "string",
+              "example": "123456"
+            }
+          }
+        },
+        "VerifyContactSendOtpBody": {
+          "type": "object",
+          "required": ["contact"],
+          "properties": {
+            "contact": {
+              "type": "string",
+              "description": "Email hoặc số điện thoại của khách hàng"
+            }
+          }
+        },
+        "VerifyContactConfirmBody": {
+          "type": "object",
+          "required": ["contact", "otp"],
+          "properties": {
+            "contact": {
+              "type": "string",
+              "description": "Email hoặc số điện thoại của khách hàng"
+            },
+            "otp": {
+              "type": "string",
+              "example": "123456"
+            }
+          }
+        },
+        "StaffCreateCustomerBody": {
+          "type": "object",
+          "required": ["phone", "name"],
+          "properties": {
+            "phone": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "identityCard": {
+              "type": "string",
+              "description": "CMND/CCCD của khách hàng"
+            },
+            "idType": {
+              "type": "string",
+              "enum": ["CCCD", "CMND", "PASSPORT", "DRIVERS_LICENSE", "OTHER"],
+              "description": "Loại giấy tờ của khách hàng"
+            }
+          }
+        },
+        "AdminCreateUserBody": {
+          "type": "object",
+          "required": ["fullName", "role", "companyId", "branchId"],
+          "properties": {
+            "fullName": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string",
+              "enum": ["manager", "staff"],
+              "default": "manager"
+            },
+            "companyId": {
+              "type": "integer"
+            },
+            "branchId": {
+              "type": "integer"
+            },
+            "phone": {
+              "type": "string",
+              "description": "Số điện thoại tùy chọn của nhân sự"
+            }
+          }
+        },
+        "OwnerCreateUserBody": {
+          "type": "object",
+          "required": ["fullName", "role", "branchId"],
+          "properties": {
+            "fullName": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string",
+              "enum": ["manager", "staff"],
+              "default": "manager"
+            },
+            "branchId": {
+              "type": "integer"
+            },
+            "phone": {
+              "type": "string",
+              "description": "Số điện thoại tùy chọn của nhân sự"
+            }
+          }
+        },
+        "ManagerCreateUserBody": {
+          "type": "object",
+          "required": ["fullName"],
+          "properties": {
+            "fullName": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string",
+              "description": "Số điện thoại tùy chọn của nhân sự"
+            }
+          }
+        },
+        "UpdateBranchBody": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            },
+            "bannerUrls": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "BranchStatusBody": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["active", "inactive"],
+              "example": "active"
+            }
+          }
+        },
+        "AdminCreateBranchBody": {
+          "type": "object",
+          "required": ["companyId", "name"],
+          "properties": {
+            "companyId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            },
+            "bannerUrls": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "OwnerCreateBranchBody": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            },
+            "bannerUrls": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "CreateCompanyBody": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "taxId": {
+              "type": "string"
+            },
+            "representative": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "logoUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "bannerUrls": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "AdminCreateCompanyBody": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "taxId": {
+              "type": "string"
+            },
+            "representative": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "logoUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "bannerUrls": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            },
+            "status": {
+              "type": "string",
+              "enum": ["pending", "active", "inactive", "rejected"]
+            },
+            "isVerified": {
+              "type": "boolean"
+            },
+            "ownerId": {
+              "type": "integer"
+            }
+          }
+        },
+        "OwnerCreateCompanyBody": {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "taxId": {
+              "type": "string"
+            },
+            "representative": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "logoUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "bannerUrls": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "UpdateCompanyBody": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "taxId": {
+              "type": "string"
+            },
+            "representative": {
+              "type": "string"
+            },
+            "address": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "logoUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "bannerUrls": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
+          }
+        },
+        "ReviewCompanyBody": {
+          "type": "object",
+          "required": ["action"],
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": ["accept", "reject"],
+              "default": "accept"
+            },
+            "note": {
+              "type": "string",
+              "description": "Ghi chú phê duyệt (tuỳ chọn)"
+            }
+          }
+        },
+        "UpdateCompanyStatusBody": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["pending", "active", "inactive", "rejected"],
+              "default": "active",
+              "description": "Trạng thái mới của công ty"
+            }
+          }
+        },
+        "UpdateCustomerProfileBody": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "avatarUrl": {
+              "type": "string",
+              "format": "uri"
+            },
+            "identityCard": {
+              "type": "string",
+              "description": "Mã số giấy tờ chỉ được chứa chữ hoa và chữ số, dài 5-20 ký tự"
+            },
+            "idType": {
+              "type": "string",
+              "enum": ["CCCD", "CMND", "PASSPORT", "DRIVERS_LICENSE", "OTHER"],
+              "description": "Loại giấy tờ của khách hàng"
+            }
+          }
+        },
+        "CustomerRequestContactChangeBody": {
+          "type": "object",
+          "required": ["type", "newValue"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["email", "phone"]
+            },
+            "newValue": {
+              "type": "string"
+            }
+          }
+        },
+        "CustomerVerifyContactChangeBody": {
+          "type": "object",
+          "required": ["otp"],
+          "properties": {
+            "otp": {
+              "type": "string",
+              "minLength": 6,
+              "maxLength": 6,
+              "description": "Mã OTP 6 số nhận được qua Email/SMS"
+            }
+          },
+          "example": {
+            "otp": "123456"
+          }
+        },
+        "CustomerSessionHistoryItem": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "branchId": {
+              "type": "integer"
+            },
+            "roomId": {
+              "type": "integer"
+            },
+            "checkInTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "checkOutTime": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "totalFee": {
+              "type": "number"
+            },
+            "status": {
+              "type": "string"
+            }
+          }
+        },
+        "CustomerProfileResponse": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "nullable": true
+            },
+            "phone": {
+              "type": "string",
+              "nullable": true
+            },
+            "avatarUrl": {
+              "type": "string",
+              "nullable": true
+            },
+            "identityCard": {
+              "type": "string",
+              "nullable": true
+            },
+            "idType": {
+              "type": "string",
+              "nullable": true,
+              "enum": ["CCCD", "CMND", "PASSPORT", "DRIVERS_LICENSE", "OTHER"]
+            },
+            "isEmailVerified": {
+              "type": "boolean"
+            },
+            "isPhoneVerified": {
+              "type": "boolean"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "sessions": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/CustomerSessionHistoryItem"
+              }
+            }
+          }
+        },
+        "CustomerListItem": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "nullable": true
+            },
+            "phone": {
+              "type": "string",
+              "nullable": true
+            },
+            "avatarUrl": {
+              "type": "string",
+              "nullable": true
+            },
+            "status": {
+              "type": "string"
+            },
+            "isEmailVerified": {
+              "type": "boolean"
+            },
+            "isPhoneVerified": {
+              "type": "boolean"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        },
+        "CustomerListResponse": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/CustomerListItem"
+              }
+            },
+            "total": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "totalPages": {
+              "type": "integer"
+            }
+          }
+        },
+        "UpdateCustomerStatusBody": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["active", "locked"]
+            }
+          }
+        },
+        "RoomTypeBranch": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "companyId": {
+              "type": "integer"
+            }
+          }
+        },
+        "RoomTypeItem": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "branchId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "initialHours": {
+              "type": "integer",
+              "format": "int32",
+              "description": "Số giờ ban đầu (phải là số nguyên)"
+            },
+            "initialPrice": {
+              "type": "number"
+            },
+            "nextHourPrice": {
+              "type": "number"
+            },
+            "overnightPrice": {
+              "type": "number"
+            },
+            "dailyPrice": {
+              "type": "number"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "branch": {
+              "$ref": "#/components/schemas/RoomTypeBranch"
+            }
+          }
+        },
+        "RoomTypeListResponse": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/RoomTypeItem"
+              }
+            },
+            "total": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "totalPages": {
+              "type": "integer"
+            }
+          }
+        },
+        "CreateRoomTypeBody": {
+          "type": "object",
+          "required": [
+            "branchId",
+            "name",
+            "initialHours",
+            "initialPrice",
+            "nextHourPrice",
+            "overnightPrice",
+            "dailyPrice"
+          ],
+          "properties": {
+            "branchId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "initialHours": {
+              "type": "number"
+            },
+            "initialPrice": {
+              "type": "number"
+            },
+            "nextHourPrice": {
+              "type": "number"
+            },
+            "overnightPrice": {
+              "type": "number"
+            },
+            "dailyPrice": {
+              "type": "number"
+            }
+          }
+        },
+        "UpdateRoomTypeBody": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "initialHours": {
+              "type": "number"
+            },
+            "initialPrice": {
+              "type": "number"
+            },
+            "nextHourPrice": {
+              "type": "number"
+            },
+            "overnightPrice": {
+              "type": "number"
+            },
+            "dailyPrice": {
+              "type": "number"
+            }
+          }
+        },
+        "RoomTypeSummary": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "initialHours": {
+              "type": "integer"
+            },
+            "initialPrice": {
+              "type": "number"
+            },
+            "nextHourPrice": {
+              "type": "number"
+            },
+            "overnightPrice": {
+              "type": "number"
+            },
+            "dailyPrice": {
+              "type": "number"
+            }
+          }
+        },
+        "RoomItem": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "branchId": {
+              "type": "integer"
+            },
+            "typeId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nfcId": {
+              "type": "string",
+              "nullable": true
+            },
+            "status": {
+              "type": "string",
+              "enum": ["available", "occupied", "cleaning", "maintenance"]
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "type": {
+              "$ref": "#/components/schemas/RoomTypeSummary"
+            }
+          }
+        },
+        "RoomListResponse": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/RoomItem"
+              }
+            },
+            "total": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "totalPages": {
+              "type": "integer"
+            }
+          }
+        },
+        "CreateRoomBody": {
+          "type": "object",
+          "required": ["branchId", "typeId", "name"],
+          "properties": {
+            "branchId": {
+              "type": "integer"
+            },
+            "typeId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nfcId": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": ["available", "occupied", "cleaning", "maintenance"]
+            }
+          }
+        },
+        "UpdateRoomBody": {
+          "type": "object",
+          "properties": {
+            "typeId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nfcId": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string",
+              "enum": ["available", "occupied", "cleaning", "maintenance"]
+            }
+          }
+        },
+        "UpdateRoomStatusBody": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["available", "occupied", "cleaning", "maintenance"]
+            }
+          }
+        },
+        "ServiceBranch": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            }
+          }
+        },
+        "ServiceItem": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "branchId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "currentPrice": {
+              "type": "number"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "branch": {
+              "$ref": "#/components/schemas/ServiceBranch"
+            }
+          }
+        },
+        "ServiceListResponse": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ServiceItem"
+              }
+            },
+            "total": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "totalPages": {
+              "type": "integer"
+            }
+          }
+        },
+        "CreateServiceBody": {
+          "type": "object",
+          "required": ["branchId", "name", "currentPrice"],
+          "properties": {
+            "branchId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "currentPrice": {
+              "type": "number"
+            }
+          }
+        },
+        "UpdateServiceBody": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "currentPrice": {
+              "type": "number"
+            }
+          }
+        },
+        "CheckInBody": {
+          "type": "object",
+          "required": ["roomId"],
+          "properties": {
+            "roomId": {
+              "type": "integer"
+            },
+            "customerId": {
+              "type": "integer",
+              "nullable": true
+            }
+          }
+        },
+        "AddServiceBody": {
+          "type": "object",
+          "required": ["serviceId", "quantity"],
+          "properties": {
+            "serviceId": {
+              "type": "integer"
+            },
+            "quantity": {
+              "type": "integer"
+            }
+          }
+        },
+        "CheckoutBody": {
+          "type": "object",
+          "description": "Yêu cầu trả phòng, dữ liệu hiện tại tạm thời rỗng"
+        },
+        "ActiveSessionRoom": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "branchId": {
+              "type": "integer"
+            },
+            "typeId": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "nfcId": {
+              "type": "string",
+              "nullable": true
+            },
+            "status": {
+              "type": "string"
+            }
+          }
+        },
+        "ActiveSessionCustomer": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "name": {
+              "type": "string"
+            },
+            "phone": {
+              "type": "string",
+              "nullable": true
+            },
+            "email": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        },
+        "ActiveSessionItem": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "branchId": {
+              "type": "integer"
+            },
+            "roomId": {
+              "type": "integer"
+            },
+            "customerId": {
+              "type": "integer",
+              "nullable": true
+            },
+            "checkInStaffId": {
+              "type": "integer"
+            },
+            "checkOutStaffId": {
+              "type": "integer",
+              "nullable": true
+            },
+            "checkInTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "checkOutTime": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            },
+            "roomFee": {
+              "type": "number",
+              "nullable": true
+            },
+            "totalFee": {
+              "type": "number",
+              "nullable": true
+            },
+            "status": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "room": {
+              "$ref": "#/components/schemas/ActiveSessionRoom"
+            },
+            "customer": {
+              "$ref": "#/components/schemas/ActiveSessionCustomer"
+            }
+          }
+        },
+        "ActiveSessionListResponse": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/ActiveSessionItem"
+              }
+            },
+            "total": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "totalPages": {
+              "type": "integer"
+            }
+          }
+        },
+        "PreCheckoutServiceItem": {
+          "type": "object",
+          "properties": {
+            "serviceId": {
+              "type": "integer"
+            },
+            "serviceName": {
+              "type": "string"
+            },
+            "quantity": {
+              "type": "integer"
+            },
+            "priceAtPurchase": {
+              "type": "number"
+            },
+            "subtotal": {
+              "type": "number"
+            }
+          }
+        },
+        "PreCheckoutBill": {
+          "type": "object",
+          "properties": {
+            "sessionId": {
+              "type": "integer"
+            },
+            "customerName": {
+              "type": "string"
+            },
+            "roomName": {
+              "type": "string"
+            },
+            "roomTypeName": {
+              "type": "string"
+            },
+            "checkInTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "preCheckOutTime": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "stayDurationHours": {
+              "type": "integer"
+            },
+            "breakdown": {
+              "type": "object",
+              "properties": {
+                "roomFee": {
+                  "type": "number"
+                },
+                "servicesFee": {
+                  "type": "number"
+                },
+                "servicesList": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PreCheckoutServiceItem"
+                  }
+                }
+              }
+            },
+            "totalAmountDue": {
+              "type": "number"
+            }
+          }
+        },
+        "UpdateUserProfileBody": {
+          "type": "object",
+          "properties": {
+            "fullName": {
+              "type": "string"
+            }
+          },
+          "example": {
+            "fullName": "Nguyễn Văn B"
+          }
+        },
+        "UserRequestContactChangeBody": {
+          "type": "object",
+          "required": ["type", "newValue"],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["email", "phone"]
+            },
+            "newValue": {
+              "type": "string"
+            }
+          }
+        },
+        "UserVerifyContactChangeBody": {
+          "type": "object",
+          "required": ["otp"],
+          "properties": {
+            "otp": {
+              "type": "string",
+              "minLength": 6,
+              "maxLength": 6,
+              "description": "Mã OTP 6 số nhận được qua Email/SMS"
+            }
+          },
+          "example": {
+            "otp": "123456"
+          }
+        },
+        "UpdateEmployeeBody": {
+          "type": "object",
+          "properties": {
+            "fullName": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "format": "email"
+            },
+            "phone": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string",
+              "enum": ["admin", "owner", "manager", "staff"]
+            },
+            "branchId": {
+              "type": "integer"
+            }
+          },
+          "example": {
+            "fullName": "Nguyễn Văn C",
+            "email": "staff@example.com",
+            "phone": "0912345678",
+            "role": "manager",
+            "branchId": 12
+          }
+        },
+        "UserProfileResponse": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "username": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "nullable": true
+            },
+            "phone": {
+              "type": "string",
+              "nullable": true
+            },
+            "isEmailVerified": {
+              "type": "boolean"
+            },
+            "isPhoneVerified": {
+              "type": "boolean"
+            },
+            "avatarUrl": {
+              "type": "string",
+              "nullable": true
+            },
+            "fullName": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            },
+            "companyId": {
+              "type": "integer",
+              "nullable": true
+            },
+            "branchId": {
+              "type": "integer",
+              "nullable": true
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "company": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            },
+            "branch": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            },
+            "status": {
+              "type": "string"
+            }
+          }
+        },
+        "UserListItem": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer"
+            },
+            "username": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string",
+              "nullable": true
+            },
+            "phone": {
+              "type": "string",
+              "nullable": true
+            },
+            "isEmailVerified": {
+              "type": "boolean"
+            },
+            "isPhoneVerified": {
+              "type": "boolean"
+            },
+            "avatarUrl": {
+              "type": "string",
+              "nullable": true
+            },
+            "fullName": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            },
+            "companyId": {
+              "type": "integer",
+              "nullable": true
+            },
+            "branchId": {
+              "type": "integer",
+              "nullable": true
+            },
+            "status": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "updatedAt": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "company": {
+              "type": "object",
+              "nullable": true,
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            },
+            "branch": {
+              "type": "object",
+              "nullable": true,
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "UserListResponse": {
+          "type": "object",
+          "properties": {
+            "items": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/UserListItem"
+              }
+            },
+            "total": {
+              "type": "integer"
+            },
+            "page": {
+              "type": "integer"
+            },
+            "limit": {
+              "type": "integer"
+            },
+            "totalPages": {
+              "type": "integer"
+            }
+          }
+        },
+        "AvatarResponse": {
+          "type": "object",
+          "properties": {
+            "avatarUrl": {
+              "type": "string"
+            }
+          }
+        },
+        "UpdateUserStatusBody": {
+          "type": "object",
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["active", "locked"]
+            }
+          }
+        }
+      }
+    },
+    "paths": {
+      "/api/health": {
+        "get": {
+          "summary": "Kiểm tra tình trạng Server",
+          "tags": ["System"],
+          "responses": {
+            "200": {
+              "description": "Server hoạt động bình thường",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "status": {
+                        "type": "string",
+                        "example": "OK"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/auth/check-account": {
+        "post": {
+          "summary": "Kiểm tra tài khoản (customer / user)",
+          "tags": ["Auth"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckAccountBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Kết quả kiểm tra",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "oneOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "exists": {
+                                    "type": "boolean",
+                                    "example": false
+                                  }
+                                }
+                              },
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "exists": {
+                                    "type": "boolean",
+                                    "example": true
+                                  },
+                                  "requirePasswordSetup": {
+                                    "type": "boolean"
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/login": {
+        "post": {
+          "summary": "Đăng nhập (customer hoặc user hệ thống)",
+          "tags": ["Auth"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Đăng nhập thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "$ref": "#/components/schemas/TokenPair"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Validation lỗi"
+            },
+            "401": {
+              "description": "Sai thông tin đăng nhập"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/renew-token": {
+        "post": {
+          "summary": "Làm mới access token bằng refresh token",
+          "tags": ["Auth"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RenewTokenBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Làm mới token thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "$ref": "#/components/schemas/TokenPair"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "401": {
+              "description": "Refresh token không hợp lệ hoặc đã hết hạn"
+            },
+            "403": {
+              "description": "Tài khoản không tồn tại hoặc bị khóa"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/change-password": {
+        "post": {
+          "summary": "Đổi mật khẩu cá nhân",
+          "tags": ["Auth"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangePasswordBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Đổi mật khẩu thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ hoặc mật khẩu cũ sai"
+            },
+            "401": {
+              "description": "Chưa xác thực hoặc token không hợp lệ"
+            },
+            "403": {
+              "description": "Tài khoản không tồn tại hoặc bị khóa"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/admin/create-admin": {
+        "post": {
+          "summary": "Tạo tài khoản admin (không cần quyền)",
+          "tags": ["Auth Internal"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCreateBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo tài khoản admin thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "role": {
+                                "type": "string"
+                              },
+                              "fullName": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "409": {
+              "description": "Tên đăng nhập đã tồn tại"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/internal/create-owner": {
+        "post": {
+          "summary": "Admin tạo tài khoản owner",
+          "tags": ["Auth Internal"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerCreateBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo tài khoản owner thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "role": {
+                                "type": "string"
+                              },
+                              "fullName": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "401": {
+              "description": "Chưa xác thực"
+            },
+            "403": {
+              "description": "Chỉ admin (owner) mới được tạo owner"
+            },
+            "409": {
+              "description": "Tên đăng nhập đã tồn tại"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/customer/google-login": {
+        "post": {
+          "summary": "Đăng nhập/đăng ký khách hàng bằng Google",
+          "tags": ["Auth"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GoogleLoginBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Đăng nhập bằng Google thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "$ref": "#/components/schemas/GoogleLoginResponse"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "idToken không hợp lệ hoặc thiếu dữ liệu"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/customer/register-send-otp": {
+        "post": {
+          "summary": "Khách đăng ký — gửi OTP qua email (bước 1)",
+          "tags": ["Auth"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterSendOtpBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OTP đã gửi"
+            },
+            "400": {
+              "description": "Trùng SĐT/email hoặc dữ liệu sai"
+            },
+            "500": {
+              "description": "Lỗi gửi mail hoặc hệ thống"
+            }
+          }
+        }
+      },
+      "/api/auth/customer/register-verify-otp": {
+        "post": {
+          "summary": "Khách đăng ký — xác thực OTP (bước 2)",
+          "tags": ["Auth"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterVerifyOtpBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo tài khoản customer thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "OTP sai hoặc hết hạn"
+            },
+            "409": {
+              "description": "Trùng dữ liệu"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/customer/verify-contact/send-otp": {
+        "post": {
+          "summary": "Gửi OTP xác thực thông tin liên lạc (email hoặc phone)",
+          "tags": ["Auth"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyContactSendOtpBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OTP đã được gửi"
+            },
+            "400": {
+              "description": "Thông tin liên lạc sai hoặc không khớp với tài khoản"
+            },
+            "403": {
+              "description": "Chỉ customer mới được phép"
+            },
+            "429": {
+              "description": "Quá nhiều yêu cầu trong 1 phút"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/auth/customer/verify-contact/confirm": {
+        "post": {
+          "summary": "Xác nhận OTP để đánh dấu email/phone là đã xác thực",
+          "tags": ["Auth"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerifyContactConfirmBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Xác thực thành công"
+            },
+            "400": {
+              "description": "OTP không hợp lệ hoặc hết hạn"
+            },
+            "403": {
+              "description": "Chỉ customer mới được phép"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/auth/customer/resend-otp": {
+        "post": {
+          "summary": "Gửi lại OTP đăng ký khách hàng",
+          "tags": ["Auth"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResendOtpBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "OTP mới đã được gửi vào email"
+            },
+            "400": {
+              "description": "Yêu cầu OTP không tồn tại hoặc đã hết hạn"
+            },
+            "429": {
+              "description": "Bạn thao tác quá nhanh, vui lòng thử lại sau 1 phút"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/customer/forgot-password": {
+        "post": {
+          "summary": "Yêu cầu lấy lại mật khẩu cho khách hàng",
+          "tags": ["Auth"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForgotPasswordBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Hướng dẫn lấy lại mật khẩu đã được gửi vào email"
+            },
+            "400": {
+              "description": "Email không tồn tại hoặc dữ liệu sai"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/customer/reset-password": {
+        "post": {
+          "summary": "Đặt lại mật khẩu mới cho khách hàng",
+          "tags": ["Auth"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPasswordBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Đặt lại mật khẩu thành công"
+            },
+            "400": {
+              "description": "Đường dẫn không hợp lệ hoặc đã hết hạn"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/internal/forgot-password": {
+        "post": {
+          "summary": "Yêu cầu lấy lại mật khẩu cho tài khoản nội bộ",
+          "tags": ["Auth Internal"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForgotPasswordBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Hướng dẫn lấy lại mật khẩu đã được gửi vào email"
+            },
+            "400": {
+              "description": "Email không tồn tại hoặc dữ liệu sai"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/internal/reset-password": {
+        "post": {
+          "summary": "Đặt lại mật khẩu mới cho tài khoản nội bộ",
+          "tags": ["Auth Internal"],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResetPasswordBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Đặt lại mật khẩu thành công"
+            },
+            "400": {
+              "description": "Đường dẫn không hợp lệ hoặc đã hết hạn"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/internal/admin/create-user": {
+        "post": {
+          "summary": "Admin tạo tài khoản nhân viên nội bộ",
+          "tags": ["Auth Internal"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCreateUserBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo tài khoản nhân viên thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "password": {
+                                "type": "string"
+                              },
+                              "role": {
+                                "type": "string"
+                              },
+                              "companyId": {
+                                "type": "integer"
+                              },
+                              "branchId": {
+                                "type": "integer"
+                              },
+                              "fullName": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "401": {
+              "description": "Chưa đăng nhập / token sai"
+            },
+            "403": {
+              "description": "Chỉ admin mới được tạo user nội bộ"
+            },
+            "409": {
+              "description": "Tên đăng nhập đã tồn tại"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/internal/owner/create-user": {
+        "post": {
+          "summary": "Owner tạo tài khoản nhân viên nội bộ",
+          "tags": ["Auth Internal"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerCreateUserBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo tài khoản nhân viên thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "password": {
+                                "type": "string"
+                              },
+                              "role": {
+                                "type": "string"
+                              },
+                              "companyId": {
+                                "type": "integer"
+                              },
+                              "branchId": {
+                                "type": "integer"
+                              },
+                              "fullName": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "401": {
+              "description": "Chưa đăng nhập / token sai"
+            },
+            "403": {
+              "description": "Chi nhánh không thuộc quyền quản lý của bạn"
+            },
+            "409": {
+              "description": "Tên đăng nhập đã tồn tại"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/internal/manager/create-user": {
+        "post": {
+          "summary": "Manager tạo tài khoản staff nội bộ",
+          "tags": ["Auth Internal"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManagerCreateUserBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo tài khoản nhân viên thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "username": {
+                                "type": "string"
+                              },
+                              "password": {
+                                "type": "string"
+                              },
+                              "role": {
+                                "type": "string"
+                              },
+                              "companyId": {
+                                "type": "integer"
+                              },
+                              "branchId": {
+                                "type": "integer"
+                              },
+                              "fullName": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "401": {
+              "description": "Chưa đăng nhập / token sai"
+            },
+            "403": {
+              "description": "Chỉ manager mới được tạo staff"
+            },
+            "409": {
+              "description": "Tên đăng nhập đã tồn tại"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/internal/force-reset-password/{targetUserId}": {
+        "post": {
+          "summary": "Cấp lại mật khẩu cho tài khoản nội bộ",
+          "tags": ["Auth Internal"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "targetUserId",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              },
+              "description": "ID của tài khoản cần cấp lại mật khẩu"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Cấp lại mật khẩu thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "allOf": [
+                      {
+                        "$ref": "#/components/schemas/ApiEnvelope"
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "object",
+                            "properties": {
+                              "newPassword": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "401": {
+              "description": "Chưa đăng nhập / token sai"
+            },
+            "403": {
+              "description": "Không đủ quyền đặt lại mật khẩu cho tài khoản này"
+            },
+            "404": {
+              "description": "Tài khoản không tồn tại"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/auth/staff/create-customer": {
+        "post": {
+          "summary": "Nhân viên tạo nhanh khách (password null)",
+          "tags": ["Auth Internal"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StaffCreateCustomerBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo khách thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "401": {
+              "description": "Chưa đăng nhập / token sai"
+            },
+            "403": {
+              "description": "Không phải tài khoản nhân viên"
+            },
+            "409": {
+              "description": "Số điện thoại đã tồn tại"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/branches/admin": {
+        "post": {
+          "summary": "Tạo chi nhánh cho công ty bởi admin",
+          "tags": ["Branch"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCreateBranchBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo chi nhánh thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy công ty"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/branches/owner": {
+        "post": {
+          "summary": "Tạo chi nhánh cho công ty của owner",
+          "tags": ["Branch"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerCreateBranchBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo chi nhánh thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền hoặc owner chưa liên kết công ty"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "get": {
+          "summary": "Lấy danh sách chi nhánh của công ty owner",
+          "tags": ["Branch"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer",
+                "default": 1
+              }
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer",
+                "default": 20
+              }
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Tìm kiếm theo tên chi nhánh (insensitive)"
+            },
+            {
+              "in": "query",
+              "name": "status",
+              "schema": {
+                "type": "string",
+                "enum": ["active", "inactive"]
+              },
+              "description": "Lọc theo trạng thái chi nhánh"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy danh sách chi nhánh của owner thành công"
+            },
+            "400": {
+              "description": "Dữ liệu truy vấn không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/branches": {
+        "get": {
+          "summary": "Lấy danh sách chi nhánh cho admin",
+          "tags": ["Branch"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer",
+                "default": 1
+              }
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer",
+                "default": 20
+              }
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Tìm kiếm theo tên chi nhánh (insensitive)"
+            },
+            {
+              "in": "query",
+              "name": "status",
+              "schema": {
+                "type": "string",
+                "enum": ["active", "inactive"]
+              },
+              "description": "Lọc theo trạng thái chi nhánh"
+            },
+            {
+              "in": "query",
+              "name": "companyId",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Lọc theo công ty"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy danh sách chi nhánh thành công"
+            },
+            "400": {
+              "description": "Dữ liệu truy vấn không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/branches/{id}": {
+        "get": {
+          "summary": "Lấy chi tiết chi nhánh",
+          "tags": ["Branch"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy thông tin chi nhánh thành công"
+            },
+            "400": {
+              "description": "Id không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy chi nhánh"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Cập nhật chi nhánh",
+          "tags": ["Branch"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateBranchBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật chi nhánh thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy chi nhánh"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Xóa chi nhánh",
+          "tags": ["Branch"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Chi nhánh đã bị xóa"
+            },
+            "400": {
+              "description": "Id không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy chi nhánh"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/branches/{id}/status": {
+        "patch": {
+          "summary": "Thay đổi trạng thái chi nhánh",
+          "tags": ["Branch"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BranchStatusBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Thay đổi trạng thái chi nhánh thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy chi nhánh"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/companies/admin": {
+        "post": {
+          "summary": "Admin tạo công ty mới",
+          "tags": ["Company"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminCreateCompanyBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo công ty thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ hoặc ownerId không hợp lệ"
+            },
+            "403": {
+              "description": "Chỉ admin mới được phép tạo công ty"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/companies/owner": {
+        "post": {
+          "summary": "Owner tạo công ty mới",
+          "tags": ["Company"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerCreateCompanyBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo công ty thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ hoặc bạn đã sở hữu công ty"
+            },
+            "403": {
+              "description": "Chỉ owner mới được phép tạo công ty"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/companies": {
+        "get": {
+          "summary": "Lấy danh sách công ty",
+          "tags": ["Company"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer",
+                "default": 1
+              }
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer",
+                "default": 20
+              }
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Tìm kiếm theo tên công ty (insensitive)"
+            },
+            {
+              "in": "query",
+              "name": "status",
+              "schema": {
+                "type": "string",
+                "enum": ["pending", "active", "inactive", "rejected"]
+              },
+              "description": "Lọc theo trạng thái công ty"
+            },
+            {
+              "in": "query",
+              "name": "isVerified",
+              "schema": {
+                "type": "boolean"
+              },
+              "description": "Lọc theo trạng thái xác thực (true/false)"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy danh sách công ty thành công"
+            },
+            "400": {
+              "description": "Dữ liệu truy vấn không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/companies/{id}": {
+        "get": {
+          "summary": "Lấy chi tiết công ty",
+          "tags": ["Company"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy thông tin công ty thành công"
+            },
+            "400": {
+              "description": "Id không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy công ty"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Cập nhật thông tin công ty",
+          "tags": ["Company"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật công ty thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy công ty"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Xóa công ty",
+          "tags": ["Company"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Công ty đã bị xóa"
+            },
+            "400": {
+              "description": "Id không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy công ty"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/companies/{id}/review": {
+        "patch": {
+          "summary": "Admin duyệt công ty",
+          "tags": ["Company"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewCompanyBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Duyệt công ty thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy công ty"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/companies/{id}/status": {
+        "patch": {
+          "summary": "Cập nhật trạng thái công ty",
+          "tags": ["Company"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCompanyStatusBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật trạng thái công ty thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền"
+            },
+            "404": {
+              "description": "Không tìm thấy công ty"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/customers": {
+        "get": {
+          "summary": "Lấy danh sách khách hàng",
+          "tags": ["Customer"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Trang hiện tại"
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Số bản ghi mỗi trang"
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Tìm kiếm gần đúng theo tên, email hoặc số điện thoại"
+            },
+            {
+              "in": "query",
+              "name": "isEmailVerified",
+              "schema": {
+                "type": "boolean"
+              },
+              "description": "Lọc theo trạng thái email đã xác thực"
+            },
+            {
+              "in": "query",
+              "name": "isPhoneVerified",
+              "schema": {
+                "type": "boolean"
+              },
+              "description": "Lọc theo trạng thái điện thoại đã xác thực"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy danh sách khách hàng thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/CustomerListResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu truy vấn không hợp lệ"
+            },
+            "403": {
+              "description": "Chỉ admin mới được phép truy cập"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/customers/profile/request-contact-change": {
+        "post": {
+          "summary": "Yêu cầu OTP để thay đổi email/số điện thoại",
+          "tags": ["Customer"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerRequestContactChangeBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Mã OTP đã được gửi"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Chỉ khách hàng mới được phép truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy khách hàng"
+            },
+            "409": {
+              "description": "Email hoặc số điện thoại đã được sử dụng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/customers/profile/verify-contact-change": {
+        "post": {
+          "summary": "Xác nhận OTP để cập nhật email/số điện thoại",
+          "tags": ["Customer"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerVerifyContactChangeBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Xác nhận thay đổi thông tin liên lạc thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer"
+                      },
+                      "status": {
+                        "type": "boolean"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/CustomerProfileResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Mã OTP không hợp lệ hoặc đã hết hạn"
+            },
+            "403": {
+              "description": "Chỉ khách hàng mới được phép truy cập"
+            },
+            "409": {
+              "description": "Email hoặc số điện thoại đã được sử dụng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/customers/profile": {
+        "get": {
+          "summary": "Lấy thông tin profile khách hàng",
+          "tags": ["Customer"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy thông tin thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/CustomerProfileResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Chỉ khách hàng mới được phép truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy khách hàng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Cập nhật thông tin profile khách hàng",
+          "tags": ["Customer"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCustomerProfileBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật thông tin thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/CustomerProfileResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Chỉ khách hàng mới được phép truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy khách hàng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/customers/profile/avatar": {
+        "patch": {
+          "summary": "Cập nhật avatar khách hàng",
+          "tags": ["Customer"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  },
+                  "required": ["file"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật ảnh đại diện thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "nullable": true,
+                        "type": "object"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Vui lòng đính kèm file ảnh"
+            },
+            "403": {
+              "description": "Chỉ khách hàng mới được phép truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy khách hàng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/customers/{id}/status": {
+        "patch": {
+          "summary": "Khoá/Mở khoá khách hàng",
+          "tags": ["Customer"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              },
+              "description": "ID của khách hàng"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateCustomerStatusBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật trạng thái khách hàng thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "401": {
+              "description": "Chưa xác thực"
+            },
+            "403": {
+              "description": "Chỉ admin mới được phép thay đổi trạng thái khách hàng"
+            },
+            "404": {
+              "description": "Không tìm thấy khách hàng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/room-types": {
+        "post": {
+          "summary": "Tạo loại phòng mới",
+          "tags": ["RoomType"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateRoomTypeBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo loại phòng thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy chi nhánh"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "get": {
+          "summary": "Lấy danh sách loại phòng",
+          "tags": ["RoomType"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer",
+                "default": 1
+              }
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer",
+                "default": 20
+              }
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Tìm kiếm theo tên loại phòng"
+            },
+            {
+              "in": "query",
+              "name": "branchId",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Lọc theo chi nhánh"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy danh sách loại phòng thành công"
+            },
+            "400": {
+              "description": "Dữ liệu truy vấn không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/room-types/{id}": {
+        "get": {
+          "summary": "Lấy chi tiết loại phòng",
+          "tags": ["RoomType"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy thông tin loại phòng thành công"
+            },
+            "400": {
+              "description": "Id không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy loại phòng"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Cập nhật loại phòng",
+          "tags": ["RoomType"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateRoomTypeBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật loại phòng thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy loại phòng"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Xóa loại phòng",
+          "tags": ["RoomType"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Xóa loại phòng thành công"
+            },
+            "400": {
+              "description": "Không thể xóa do đang có phòng sử dụng"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy loại phòng"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/rooms": {
+        "post": {
+          "summary": "Tạo phòng mới",
+          "tags": ["Room"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateRoomBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo phòng thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ hoặc loại phòng không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy chi nhánh"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "get": {
+          "summary": "Lấy danh sách phòng",
+          "tags": ["Room"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer",
+                "default": 1
+              }
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer",
+                "default": 20
+              }
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Tìm kiếm theo tên phòng hoặc NFC ID"
+            },
+            {
+              "in": "query",
+              "name": "branchId",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Lọc theo chi nhánh"
+            },
+            {
+              "in": "query",
+              "name": "typeId",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Lọc theo loại phòng"
+            },
+            {
+              "in": "query",
+              "name": "status",
+              "schema": {
+                "type": "string",
+                "enum": ["available", "occupied", "cleaning", "maintenance"]
+              },
+              "description": "Lọc theo trạng thái phòng"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy danh sách phòng thành công"
+            },
+            "400": {
+              "description": "Dữ liệu truy vấn không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/rooms/{id}": {
+        "get": {
+          "summary": "Lấy chi tiết phòng",
+          "tags": ["Room"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy thông tin phòng thành công"
+            },
+            "400": {
+              "description": "ID phòng không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy phòng"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Cập nhật phòng",
+          "tags": ["Room"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateRoomBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật phòng thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy phòng"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Xóa phòng",
+          "tags": ["Room"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Xóa phòng thành công"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy phòng"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/rooms/{id}/status": {
+        "patch": {
+          "summary": "Cập nhật trạng thái phòng",
+          "tags": ["Room"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateRoomStatusBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật trạng thái phòng thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy phòng"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/services": {
+        "post": {
+          "summary": "Tạo dịch vụ mới",
+          "tags": ["Service"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateServiceBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Tạo dịch vụ thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy chi nhánh"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "get": {
+          "summary": "Lấy danh sách dịch vụ",
+          "tags": ["Service"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer",
+                "default": 1
+              }
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer",
+                "default": 20
+              }
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Tìm kiếm theo tên dịch vụ"
+            },
+            {
+              "in": "query",
+              "name": "branchId",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Lọc theo chi nhánh"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy danh sách dịch vụ thành công"
+            },
+            "400": {
+              "description": "Dữ liệu truy vấn không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/services/{id}": {
+        "get": {
+          "summary": "Lấy chi tiết dịch vụ",
+          "tags": ["Service"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy thông tin dịch vụ thành công"
+            },
+            "400": {
+              "description": "ID dịch vụ không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy dịch vụ"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Cập nhật dịch vụ",
+          "tags": ["Service"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateServiceBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật dịch vụ thành công"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy dịch vụ"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        },
+        "delete": {
+          "summary": "Xóa dịch vụ",
+          "tags": ["Service"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Xóa dịch vụ thành công"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy dịch vụ"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/sessions/check-in": {
+        "post": {
+          "summary": "Nhận phòng cho khách",
+          "tags": ["Session"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckInBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Nhận phòng thành công"
+            },
+            "400": {
+              "description": "Phòng không hợp lệ hoặc không sẵn sàng"
+            },
+            "401": {
+              "description": "Token không hợp lệ hoặc thiếu"
+            },
+            "403": {
+              "description": "Không có quyền thực hiện"
+            },
+            "404": {
+              "description": "Không tìm thấy phòng hoặc khách hàng"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/sessions/{id}/services": {
+        "post": {
+          "summary": "Gọi dịch vụ cho phiên thuê",
+          "tags": ["Session"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddServiceBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Gọi dịch vụ thành công"
+            },
+            "400": {
+              "description": "Phiên thuê không hợp lệ hoặc đã trả phòng"
+            },
+            "401": {
+              "description": "Token không hợp lệ hoặc thiếu"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy phiên thuê hoặc dịch vụ"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/sessions/{id}/checkout": {
+        "post": {
+          "summary": "Trả phòng và tính tiền",
+          "tags": ["Session"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Trả phòng thành công"
+            },
+            "400": {
+              "description": "Phiên thuê không hợp lệ hoặc thiếu dữ liệu"
+            },
+            "401": {
+              "description": "Token không hợp lệ hoặc thiếu"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy phiên thuê"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/sessions/active": {
+        "get": {
+          "summary": "Lấy danh sách các phiên thuê đang hoạt động",
+          "tags": ["Session"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer",
+                "default": 1
+              }
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer",
+                "default": 20
+              }
+            },
+            {
+              "in": "query",
+              "name": "roomId",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Lọc theo mã phòng"
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Tìm theo tên khách hàng"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy danh sách phiên thuê thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ActiveSessionListResponse"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu truy vấn không hợp lệ"
+            },
+            "401": {
+              "description": "Token không hợp lệ hoặc thiếu"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/sessions/{id}/pre-checkout": {
+        "get": {
+          "summary": "Lấy hóa đơn tạm tính trước khi trả phòng",
+          "tags": ["Session"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy hóa đơn tạm tính thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PreCheckoutBill"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Phiên thuê không hợp lệ hoặc thiếu dữ liệu"
+            },
+            "401": {
+              "description": "Token không hợp lệ hoặc thiếu"
+            },
+            "403": {
+              "description": "Không có quyền truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy phiên thuê"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/upload/image": {
+        "post": {
+          "summary": "Upload ảnh lên Supabase Storage",
+          "tags": ["Upload"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary",
+                      "description": "Ảnh JPG, PNG hoặc WEBP"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Upload ảnh thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "number",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string",
+                        "example": "Upload ảnh thành công"
+                      },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "fileUrl": {
+                            "type": "string",
+                            "example": "https://your-supabase-url.supabase.co/storage/v1/object/public/hotel-assets/images/1680000000000-image.png"
+                          },
+                          "fileName": {
+                            "type": "string",
+                            "example": "image.png"
+                          },
+                          "fileType": {
+                            "type": "string",
+                            "example": "image/png"
+                          },
+                          "fileSize": {
+                            "type": "number",
+                            "example": 12345
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Lỗi khi upload file hoặc định dạng không đúng"
+            },
+            "401": {
+              "description": "Yêu cầu đăng nhập"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/upload/attachment": {
+        "post": {
+          "summary": "Upload tài liệu lên Supabase Storage",
+          "tags": ["Upload"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary",
+                      "description": "Tài liệu PDF/DOC/DOCX/XLS/XLSX/TXT"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Upload tài liệu thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "number",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string",
+                        "example": "Upload tài liệu thành công"
+                      },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "fileUrl": {
+                            "type": "string",
+                            "example": "https://your-supabase-url.supabase.co/storage/v1/object/public/hotel-assets/attachments/1680000000000-document.pdf"
+                          },
+                          "fileName": {
+                            "type": "string",
+                            "example": "document.pdf"
+                          },
+                          "fileType": {
+                            "type": "string",
+                            "example": "application/pdf"
+                          },
+                          "fileSize": {
+                            "type": "number",
+                            "example": 23456
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Lỗi khi upload file hoặc định dạng không đúng"
+            },
+            "401": {
+              "description": "Yêu cầu đăng nhập"
+            },
+            "500": {
+              "description": "Lỗi hệ thống"
+            }
+          }
+        }
+      },
+      "/api/users": {
+        "get": {
+          "summary": "Lấy danh sách nhân viên nội bộ",
+          "tags": ["User"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "query",
+              "name": "page",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Trang hiện tại"
+            },
+            {
+              "in": "query",
+              "name": "limit",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Số bản ghi mỗi trang"
+            },
+            {
+              "in": "query",
+              "name": "search",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Tìm kiếm gần đúng theo fullName hoặc username"
+            },
+            {
+              "in": "query",
+              "name": "role",
+              "schema": {
+                "type": "string"
+              },
+              "description": "Lọc theo vai trò"
+            },
+            {
+              "in": "query",
+              "name": "companyId",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Lọc theo công ty"
+            },
+            {
+              "in": "query",
+              "name": "branchId",
+              "schema": {
+                "type": "integer"
+              },
+              "description": "Lọc theo chi nhánh"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy danh sách nhân viên thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/UserListResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu truy vấn không hợp lệ"
+            },
+            "403": {
+              "description": "Không có quyền truy cập danh sách nhân viên"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/users/profile/request-contact-change": {
+        "post": {
+          "summary": "Yêu cầu OTP để thay đổi email/số điện thoại nhân viên",
+          "tags": ["User"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRequestContactChangeBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Mã OTP đã được gửi"
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Chỉ người dùng nội bộ mới được phép truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng"
+            },
+            "409": {
+              "description": "Email hoặc số điện thoại đã được sử dụng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/users/profile/verify-contact-change": {
+        "post": {
+          "summary": "Xác nhận OTP để cập nhật email/số điện thoại nhân viên",
+          "tags": ["User"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserVerifyContactChangeBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Xác nhận thay đổi thông tin liên lạc thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer"
+                      },
+                      "status": {
+                        "type": "boolean"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/UserProfileResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Mã OTP không hợp lệ hoặc đã hết hạn"
+            },
+            "403": {
+              "description": "Chỉ người dùng nội bộ mới được phép truy cập"
+            },
+            "409": {
+              "description": "Email hoặc số điện thoại đã được sử dụng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/users/profile": {
+        "get": {
+          "summary": "Lấy thông tin profile nhân viên nội bộ",
+          "tags": ["User"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Lấy thông tin thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/UserProfileResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "403": {
+              "description": "Chỉ người dùng nội bộ mới được phép truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        },
+        "patch": {
+          "summary": "Cập nhật thông tin profile nhân viên nội bộ",
+          "tags": ["User"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserProfileBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật thông tin thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/UserProfileResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Chỉ người dùng nội bộ mới được phép truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/users/profile/avatar": {
+        "patch": {
+          "summary": "Cập nhật avatar nhân viên nội bộ",
+          "tags": ["User"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "file": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  },
+                  "required": ["file"]
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật ảnh đại diện thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/AvatarResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Vui lòng đính kèm file ảnh hoặc dữ liệu không hợp lệ"
+            },
+            "403": {
+              "description": "Chỉ người dùng nội bộ mới được phép truy cập"
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/users/{id}": {
+        "patch": {
+          "summary": "Cập nhật thông tin nhân viên theo RBAC",
+          "tags": ["User"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              },
+              "description": "ID của nhân viên cần cập nhật"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateEmployeeBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật thông tin nhân viên thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "$ref": "#/components/schemas/UserProfileResponse"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "401": {
+              "description": "Chưa xác thực"
+            },
+            "403": {
+              "description": "Không có quyền cập nhật nhân viên này"
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng hoặc chi nhánh"
+            },
+            "409": {
+              "description": "Email đã được sử dụng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      },
+      "/api/users/{id}/status": {
+        "patch": {
+          "summary": "Khoá/Mở khoá nhân viên nội bộ",
+          "tags": ["User"],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "in": "path",
+              "name": "id",
+              "required": true,
+              "schema": {
+                "type": "integer"
+              },
+              "description": "ID của nhân viên"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateUserStatusBody"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Cập nhật trạng thái nhân viên thành công",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "code": {
+                        "type": "integer",
+                        "example": 200
+                      },
+                      "status": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "data": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Dữ liệu không hợp lệ"
+            },
+            "401": {
+              "description": "Chưa xác thực"
+            },
+            "403": {
+              "description": "Chỉ admin mới được phép thay đổi trạng thái nhân viên"
+            },
+            "404": {
+              "description": "Không tìm thấy người dùng"
+            },
+            "500": {
+              "description": "Lỗi máy chủ"
+            }
+          }
+        }
+      }
+    },
+    "tags": [
+      {
+        "name": "Auth",
+        "description": "Đăng ký, đăng nhập, OTP khách hàng"
+      },
+      {
+        "name": "Auth Internal",
+        "description": "Các thao tác nội bộ dành cho user/owner/manager/admin"
+      },
+      {
+        "name": "Branch",
+        "description": "Quản lý chi nhánh"
+      },
+      {
+        "name": "Company",
+        "description": "Quản lý Công ty/Khách sạn tổng"
+      },
+      {
+        "name": "Customer",
+        "description": "Các API liên quan đến khách hàng"
+      },
+      {
+        "name": "RoomType",
+        "description": "Quản lý loại phòng và bảng giá"
+      },
+      {
+        "name": "Room",
+        "description": "Quản lý phòng vật lý"
+      },
+      {
+        "name": "Service",
+        "description": "Quản lý dịch vụ đi kèm"
+      },
+      {
+        "name": "Session",
+        "description": "Quản lý phiên thuê phòng"
+      },
+      {
+        "name": "Upload",
+        "description": "Các API liên quan đến upload file lên Supabase Storage"
+      },
+      {
+        "name": "User",
+        "description": "Các API liên quan đến nhân viên nội bộ"
+      }
+    ]
+  },
+  "customOptions": {}
+}
