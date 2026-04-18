@@ -1,0 +1,58 @@
+name: Huy M4 Pro Config
+version: 1.0.0
+schema: v1
+
+models:
+  - name: Llama Vision (Main)
+    provider: ollama
+    model: llama3.2-vision:11b
+    roles:
+      - chat
+      - edit
+      - apply
+    defaultCompletionOptions:
+      temperature: 0.3
+      contextLength: 32000
+
+  - name: Qwen 3 (Autocomplete)
+    provider: ollama
+    model: qwen3:8b
+    roles:
+      - autocomplete
+    autocompleteOptions:
+      debounceDelay: 250
+      maxPromptTokens: 1024
+      onlyMyCode: true
+
+rules:
+  - "Luôn giải thích bằng tiếng Việt gọn súc."
+  - "Với Next.js: Luôn dùng App Router, Tailwind CSS và ưu tiên Server Components."
+  - "Với NestJS: Tuân thủ Pattern Module-Service-Controller, dùng DTO cho validation."
+  - "Khi hoàn thành code, tạo/cập nhật file README_GUIDE.md để giải thích logic và cách run."
+  - "Ưu tiên sử dụng TypeScript strict mode trong mọi gợi ý."
+  - "Mọi block code phải bắt đầu bằng đường dẫn file đầy đủ trên dòng đầu tiên, ví dụ: '// filepath: src/modules/hotel/hotel.entity.ts'."
+  - "Luôn ưu tiên cấu trúc thư mục tiêu chuẩn của NestJS khi gợi ý đường dẫn file."
+  - "Luôn sử dụng @Codebase để phân tích cấu trúc các Module hiện tại trước khi gợi ý code mới."
+  - "Khi viết Service, hãy kiểm tra xem Entity tương ứng đã được khai báo trong Module chưa."
+
+docs:
+  - name: NestJS
+    startUrl: https://docs.nestjs.com/
+  - name: Next.js
+    startUrl: https://nextjs.org/docs
+  - name: Tailwind
+    startUrl: https://tailwindcss.com/docs
+  - name: MongoDB
+    startUrl: https://www.mongodb.com/docs/
+  - name: React
+    startUrl: https://react.dev
+  - name: TypeScript
+    startUrl: https://www.typescriptlang.org/docs/
+  - name: Tanstack Query
+    startUrl: https://tanstack.com/query/latest/docs/react/overview
+  - name: Prisma
+    startUrl: https://www.prisma.io/docs/
+  - name: Zod
+    startUrl: https://zod.dev/
+  - name: React Hook Form
+    startUrl: https://react-hook-form.com/get-started
