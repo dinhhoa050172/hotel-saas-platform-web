@@ -12,22 +12,34 @@ import { Label } from "@/components/ui/label";
 
 import { useCheckAccount, useLogin } from "@/hooks/mutations/use-auth";
 import { useRouter } from "next/navigation";
+import type { LoginType } from "@/types/auth.type";
 
 const loginSchema = z.object({
-  keyLogin: z.string().min(1, "Vui lòng nhập Email hoặc Số điện thoại"),
+  keyLogin: z
+    .string()
+    .min(1, "Vui lòng nhập Email, Số điện thoại hoặc Tên đăng nhập"),
   password: z.string().optional(),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
-interface LoginFormProps {
-  loginType: "customer" | "user";
+/**
+ * Auto-detect login type based on input:
+ * - Contains "@" → customer (email)
+ * - Otherwise → user (username for B2B/admin)
+ */
+function detectLoginType(keyLogin: string): LoginType {
+  if (keyLogin.includes("@")) {
+    return "customer";
+  }
+  return "user";
 }
 
-export function LoginForm({ loginType }: LoginFormProps) {
+export function LoginForm() {
   const router = useRouter();
   const [step, setStep] = useState<"check" | "password">("check");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [detectedType, setDetectedType] = useState<LoginType>("customer");
 
   const {
     register,
@@ -50,6 +62,10 @@ export function LoginForm({ loginType }: LoginFormProps) {
   const onSubmit = async (data: LoginFormValues) => {
     setErrorMsg(null);
 
+    // Auto-detect login type from input
+    const loginType = detectLoginType(data.keyLogin);
+    setDetectedType(loginType);
+
     if (step === "check") {
       try {
         const res = await checkAccountMutation.mutateAsync({
@@ -60,8 +76,10 @@ export function LoginForm({ loginType }: LoginFormProps) {
           setStep("password");
         } else {
           if (loginType === "customer") {
+            // Customer doesn't exist → redirect to register
             router.push("/register");
           } else {
+            // User (B2B) doesn't exist → contact admin
             setErrorMsg("Tài khoản không tồn tại. Vui lòng liên hệ Admin.");
           }
         }
@@ -81,16 +99,12 @@ export function LoginForm({ loginType }: LoginFormProps) {
         return;
       }
       try {
+        // useLogin hook handles: save tokens → fetch profile → route by role
         await loginMutation.mutateAsync({
-          login_type: loginType,
+          login_type: detectedType,
           keyLogin: data.keyLogin,
           password: data.password,
         });
-        if (loginType === "customer") {
-          router.push("/");
-        } else {
-          router.push("/admin");
-        }
       } catch (err: unknown) {
         if (err instanceof Error) {
           setErrorMsg(err.message || "Mật khẩu không chính xác");
@@ -106,22 +120,18 @@ export function LoginForm({ loginType }: LoginFormProps) {
   return (
     <div className="w-full">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Email / Phone Input */}
+        {/* Unified login input */}
         <div className="space-y-2">
           <Label
             htmlFor="keyLogin"
             className="text-sm font-medium text-[#222222]"
           >
-            {loginType === "customer"
-              ? "Email hoặc Số điện thoại"
-              : "Tên đăng nhập"}
+            Email hoặc Tên đăng nhập
           </Label>
           <Input
             id="keyLogin"
             type="text"
-            placeholder={
-              loginType === "customer" ? "name@email.com" : "admin_hotel"
-            }
+            placeholder="name@email.com hoặc username"
             {...register("keyLogin")}
             disabled={step !== "check"}
             className="h-12 rounded-xl border-gray-300 focus:border-[#222222] focus:ring-[#222222] text-base"
@@ -129,6 +139,11 @@ export function LoginForm({ loginType }: LoginFormProps) {
           {errors.keyLogin && (
             <p className="text-[#c13515] text-sm">{errors.keyLogin.message}</p>
           )}
+          {/* Hint text */}
+          <p className="text-xs text-[#6a6a6a]">
+            Nhập email để đăng nhập khách hàng, hoặc username để đăng nhập hệ
+            thống
+          </p>
         </div>
 
         {/* Password (animated entrance) */}

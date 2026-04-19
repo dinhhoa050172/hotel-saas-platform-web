@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { HeaderAuthButtons } from "./header-auth-buttons";
 
 export function Header() {
   return (
@@ -36,29 +36,15 @@ export function Header() {
             Khám phá
           </Link>
           <Link
-            href="#"
+            href="/hosting"
             className="text-sm font-medium text-[#6a6a6a] hover:text-[#222222] transition-colors"
           >
             Chủ nhà
           </Link>
         </nav>
 
-        {/* Auth Buttons */}
-        <div className="flex items-center gap-3">
-          <Link href="/login">
-            <Button
-              variant="ghost"
-              className="text-sm font-medium text-[#222222] hover:bg-gray-100 rounded-full px-5"
-            >
-              Đăng nhập
-            </Button>
-          </Link>
-          <Link href="/register">
-            <Button className="text-sm font-medium bg-[#ff385c] hover:bg-[#e00b41] text-white rounded-full px-5">
-              Đăng ký
-            </Button>
-          </Link>
-        </div>
+        {/* Auth Buttons (client component) */}
+        <HeaderAuthButtons />
       </div>
     </header>
   );

@@ -1,5 +1,6 @@
 import { apiClient } from "@/lib/api-client";
-import { ApiEnvelope } from "@/types/user.type";
+import { ApiEnvelope, UserProfileResponse } from "@/types/user.type";
+import type { CustomerProfileResponse } from "@/types/customer.type";
 import {
   CheckAccountBody,
   CheckAccountResponse,
@@ -41,6 +42,36 @@ export const authService = {
         method: "POST",
         body: JSON.stringify(body),
         requiresAuth: false,
+      },
+    );
+    return response.data;
+  },
+
+  /** Fetch user (B2B) profile */
+  getUserProfile: async (
+    token: string,
+  ): Promise<UserProfileResponse | null> => {
+    const response = await apiClient<ApiEnvelope<UserProfileResponse>>(
+      "/users/profile",
+      {
+        method: "GET",
+        requiresAuth: true,
+        token,
+      },
+    );
+    return response.data;
+  },
+
+  /** Fetch customer (B2C) profile */
+  getCustomerProfile: async (
+    token: string,
+  ): Promise<CustomerProfileResponse | null> => {
+    const response = await apiClient<ApiEnvelope<CustomerProfileResponse>>(
+      "/customers/profile",
+      {
+        method: "GET",
+        requiresAuth: true,
+        token,
       },
     );
     return response.data;

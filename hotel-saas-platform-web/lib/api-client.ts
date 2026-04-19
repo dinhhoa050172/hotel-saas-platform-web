@@ -6,6 +6,7 @@ export interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
   requiresAuth?: boolean;
   token?: string; // Explicit token for server-components usage where window.localStorage is not accessible
+  _isRetry?: boolean; // Internal flag to prevent infinite retry loops
 }
 
 export class ApiError extends Error {
@@ -20,6 +21,40 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Try to renew the access token using the refresh token.
+ * Returns the new access token if successful, null otherwise.
+ */
+async function tryRenewToken(): Promise<string | null> {
+  const refreshToken = useAuthStore.getState().refreshToken;
+  if (!refreshToken) return null;
+
+  try {
+    const response = await fetch(`${BASE_URL}/auth/renew-token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) return null;
+
+    const result = await response.json();
+    const data = result?.data;
+
+    if (data?.accessToken && data?.refreshToken) {
+      // Update store + cookies with new tokens
+      useAuthStore.getState().setAuth({
+        accessToken: data.accessToken,
+        refreshToken: data.refreshToken,
+      });
+      return data.accessToken;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function apiClient<T>(
   endpoint: string,
   options: FetchOptions = {},
@@ -28,6 +63,7 @@ export async function apiClient<T>(
     params,
     requiresAuth = true,
     token: explicitToken,
+    _isRetry = false,
     ...customConfig
   } = options;
   const headers = new Headers(customConfig.headers);
@@ -42,7 +78,6 @@ export async function apiClient<T>(
 
   // Inject Bearer token
   if (requiresAuth) {
-    // If not running in a browser, use the explicitToken (passed from `cookies()`), fallback to Zustand on client
     const token =
       explicitToken ||
       (typeof window !== "undefined"
@@ -76,10 +111,31 @@ export async function apiClient<T>(
   try {
     const response = await fetch(url, config);
 
-    // Common error handling wrapper (intercepting 401s for client interactions)
-    if (response.status === 401 && typeof window !== "undefined") {
+    // === 401 Interceptor: Try renew token before giving up ===
+    if (
+      response.status === 401 &&
+      typeof window !== "undefined" &&
+      requiresAuth &&
+      !_isRetry
+    ) {
+      const newToken = await tryRenewToken();
+
+      if (newToken) {
+        // Retry the original request with the new token
+        return apiClient<T>(endpoint, {
+          ...options,
+          token: newToken,
+          _isRetry: true,
+        });
+      }
+
+      // Renew failed → clear auth and redirect to login
       useAuthStore.getState().clearAuth();
       window.location.href = "/login";
+      throw new ApiError(
+        401,
+        "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+      );
     }
 
     const contentType = response.headers.get("content-type");

@@ -63,7 +63,7 @@ export default function LoginPage() {
           <h1 className="text-2xl font-bold text-[#222222] mb-2">Đăng nhập</h1>
           <p className="text-[#6a6a6a] mb-8">Nhập thông tin để tiếp tục</p>
 
-          <LoginForm loginType="customer" />
+          <LoginForm />
         </div>
       </div>
     </main>
